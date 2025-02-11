@@ -12,7 +12,7 @@ const ProfessorScreen = ({ navigation }) => {
   const [searchText, setSearchText] = useState(''); // Para armazenar o texto da busca
   const [selectedPost, setSelectedPost] = useState(null); // Para armazenar o post selecionado
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Verificar se o usuário está logado
-  const API_URL = 'http://192.168.0.16:3000';
+  const API_URL = 'http://172.19.96.1';
   const postsPerPage = 4;
 
   useEffect(() => {
