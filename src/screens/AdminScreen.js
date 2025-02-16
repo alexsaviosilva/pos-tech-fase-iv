@@ -6,7 +6,7 @@ const AdminScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('professor');
-  const API_URL = 'http://192.168.0.16:3000'
+  const API_URL = 'http://192.168.0.25:3000'
 
   const handleRegister = async () => {
     try {

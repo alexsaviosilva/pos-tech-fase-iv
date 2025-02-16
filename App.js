@@ -8,6 +8,7 @@ import AdminScreen from "./src/screens/AdminScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import ReadingScreen from "./src/screens/ReadingScreen";
 import CreatePostScreen from "./src/screens/CreatePostScreen";
+import EditScreen from "./src/screens/EditScreen";
 
 const Stack = createStackNavigator();
 
@@ -22,7 +23,8 @@ export default function App() {
         <Stack.Screen name="AlunoScreen" component={AlunoScreen} />
         <Stack.Screen name="ProfessorScreen" component={ProfessorScreen} />
         <Stack.Screen name="AdminScreen" component={AdminScreen} />
-        <Stack.Screen name="CreatePostScreen" component={CreatePostScreen} />
+        <Stack.Screen name="CreatePostScreen" component={CreatePostScreen} /> 
+        <Stack.Screen name="EditScreen" component={EditScreen} /> 
       </Stack.Navigator>
     </NavigationContainer>
   );

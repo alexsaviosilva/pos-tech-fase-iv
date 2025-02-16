@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 
-const API_URL = "http://192.168.0.16:3000/auth/login"; // Substitua pelo seu IP local
+const API_URL = "http://192.168.0.25:3000/auth/login"; // Substitua pelo seu IP local
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");

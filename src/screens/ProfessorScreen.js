@@ -6,66 +6,57 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfessorScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
-  const [filteredPosts, setFilteredPosts] = useState([]); // Para armazenar os posts filtrados
+  const [filteredPosts, setFilteredPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchText, setSearchText] = useState(''); // Para armazenar o texto da busca
-  const [selectedPost, setSelectedPost] = useState(null); // Para armazenar o post selecionado
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Verificar se o usuário está logado
-  const API_URL = 'http://192.168.0.16:3000';
+  const [searchText, setSearchText] = useState('');
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const API_URL = 'http://192.168.0.25:3000';
   const postsPerPage = 4;
 
   useEffect(() => {
     const checkLoginStatus = async () => {
       const token = await AsyncStorage.getItem('token');
-      if (token) {
-        setIsLoggedIn(true); // O professor está logado
-      } else {
-        setIsLoggedIn(false); // O professor não está logado
-      }
+      setIsLoggedIn(!!token);
     };
 
-    checkLoginStatus(); // Verifica o status de login
+    checkLoginStatus();
 
     const fetchPosts = async () => {
       setLoading(true);
       try {
-        // Recupera o ID do professor e o token do AsyncStorage
         const professorId = await AsyncStorage.getItem('userId');
         const token = await AsyncStorage.getItem('token');
-        
+
         if (!professorId || !token) {
           Alert.alert('Erro', 'Não foi possível identificar o professor. Faça login novamente.');
           navigation.navigate('LoginScreen');
           return;
         }
 
-        // Faz a requisição para buscar os posts do professor logado
         const response = await axios.get(`${API_URL}/posts/publicacoes/autor/${professorId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         setPosts(response.data);
-        setFilteredPosts(response.data); // Inicialmente, mostra todos os posts
+        setFilteredPosts(response.data);
       } catch (error) {
         console.error('Erro ao buscar publicações:', error.response?.data || error.message);
       } finally {
-        setLoading(false); // Garanta que o estado de loading seja alterado após a requisição
+        setLoading(false);
       }
     };
 
     fetchPosts();
   }, []);
 
-  // Função para deslogar o usuário
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('userId');
-      setIsLoggedIn(false); // Atualiza o estado para indicar que o usuário não está mais logado
-      navigation.navigate('HomeScreen'); // Redireciona para a tela home  
+      setIsLoggedIn(false);
+      navigation.navigate('HomeScreen');
       Alert.alert('Sucesso', 'Você foi desconectado!');
     } catch (error) {
       console.error('Erro ao fazer logout:', error.message);
@@ -73,35 +64,19 @@ const ProfessorScreen = ({ navigation }) => {
     }
   };
 
-  // Filtra os posts conforme o texto de busca
   const handleSearch = (text) => {
     setSearchText(text);
-
-    if (text === '') {
-      setFilteredPosts(posts); // Se a busca estiver vazia, mostra todos os posts
-    } else {
-      const filtered = posts.filter(post =>
-        post.titulo.toLowerCase().includes(text.toLowerCase()) ||
-        post.descricao.toLowerCase().includes(text.toLowerCase())
-      );
-      setFilteredPosts(filtered); // Atualiza os posts filtrados
-    }
+    setFilteredPosts(text ? posts.filter(post => post.titulo.toLowerCase().includes(text.toLowerCase()) || post.descricao.toLowerCase().includes(text.toLowerCase())) : posts);
   };
 
-  // Divisão dos posts conforme a página atual
-  const indexOfLastPost = currentPage * postsPerPage;
-  const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-
-  // Função para lidar com a exclusão do post
   const handleDelete = async (postId) => {
     try {
       const token = await AsyncStorage.getItem('token');
-      await axios.delete(`${API_URL}/posts/${postId}`, {
+      await axios.delete(`${API_URL}/posts/publicacoes/${postId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPosts(posts.filter(post => post._id !== postId));
+      setFilteredPosts(filteredPosts.filter(post => post._id !== postId));
       Alert.alert('Sucesso', 'Post excluído com sucesso!');
     } catch (error) {
       console.error('Erro ao excluir post:', error.message);
@@ -109,30 +84,21 @@ const ProfessorScreen = ({ navigation }) => {
     }
   };
 
-  // Função para lidar com a edição do post
   const handleEdit = (post) => {
-    navigation.navigate('EditPostScreen', { post });
+    console.log('Clicou no botão editar para o post:', post); // Debug
+    navigation.navigate('EditScreen', { post });
   };
-
-  // Divisão dos posts conforme a página atual
-  const handlePostSelect = (post) => {
-    setSelectedPost(post === selectedPost ? null : post); // Alterna o post selecionado
-  };
+  
 
   return (
     <View style={{ flex: 1, padding: 20 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
         <Text style={{ fontSize: 22, fontWeight: 'bold' }}>Posts do Professor 👨‍🏫</Text>
-        
-        {/* Exibir botão de logout ou login dependendo do estado */}
         {isLoggedIn ? (
           <View style={{ flexDirection: 'row' }}>
-            {/* Botão Logout */}
             <TouchableOpacity onPress={handleLogout} style={{ marginRight: 20 }}>
               <Icon name="sign-out" size={30} color="#007bff" />
             </TouchableOpacity>
-
-            {/* Botão Criar Post */}
             <TouchableOpacity onPress={() => navigation.navigate('CreatePostScreen')}>
               <Icon name="plus-circle" size={30} color="#007bff" />
             </TouchableOpacity>
@@ -144,16 +110,8 @@ const ProfessorScreen = ({ navigation }) => {
         )}
       </View>
 
-      {/* Campo de busca */}
       <TextInput
-        style={{
-          height: 40,
-          borderColor: '#ccc',
-          borderWidth: 1,
-          borderRadius: 5,
-          marginBottom: 20,
-          paddingLeft: 10,
-        }}
+        style={{ height: 40, borderColor: '#ccc', borderWidth: 1, borderRadius: 5, marginBottom: 20, paddingLeft: 10 }}
         placeholder="Buscar por título ou descrição"
         value={searchText}
         onChangeText={handleSearch}
@@ -161,74 +119,31 @@ const ProfessorScreen = ({ navigation }) => {
 
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
-      ) : currentPosts.length > 0 ? (
-        <>
-          <FlatList
-            data={currentPosts}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => handlePostSelect(item)}
-                style={{
-                  marginBottom: 15,
-                  padding: 10,
-                  borderBottomWidth: 1,
-                  backgroundColor: selectedPost && selectedPost._id === item._id ? '#e0e0e0' : 'transparent'
-                }}
-              >
-                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.titulo}</Text>
-                <Text style={{ fontSize: 14, fontWeight: 'bold', paddingTop:5, paddingBottom:5 }}>Autor: {item.autor.name}</Text>
-                <Text>{item.descricao.slice(0, 150)}...</Text>
-
-                {/* Exibir botões de editar e excluir apenas se o post estiver selecionado */}
-                {selectedPost && selectedPost._id === item._id && (
-                  <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                    <TouchableOpacity
-                      onPress={() => handleEdit(item)}
-                      style={{ marginRight: 10 }}
-                    >
-                      <Text style={{ color: '#007bff', fontWeight: 'bold' }}>Editar</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => handleDelete(item._id)}
-                    >
-                      <Text style={{ color: '#ff0000', fontWeight: 'bold' }}>Excluir</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item) => item._id}
-          />
-
-          {/* Controles de Paginação */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+      ) : filteredPosts.length > 0 ? (
+        <FlatList
+          data={filteredPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage)}
+          renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              style={{
-                padding: 10,
-                backgroundColor: currentPage === 1 ? '#ccc' : '#007bff',
-                borderRadius: 5
-              }}
+              onPress={() => setSelectedPost(item === selectedPost ? null : item)}
+              style={{ marginBottom: 15, padding: 10, borderBottomWidth: 1, backgroundColor: selectedPost && selectedPost._id === item._id ? '#e0e0e0' : 'transparent' }}
             >
-              <Text style={{ color: '#fff' }}>Anterior</Text>
+              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.titulo}</Text>
+              <Text style={{ fontSize: 14, fontWeight: 'bold', paddingTop:5, paddingBottom:5 }}>Autor: {item.autor.name}</Text>
+              <Text>{item.descricao.slice(0, 150)}...</Text>
+              {selectedPost && selectedPost._id === item._id && (
+                <View style={{ flexDirection: 'row', marginTop: 10 }}>
+                  <TouchableOpacity onPress={() => handleEdit(item)} style={{ marginRight: 10 }}>
+                    <Text style={{ color: '#007bff', fontWeight: 'bold' }}>Editar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleDelete(item._id)}>
+                    <Text style={{ color: '#ff0000', fontWeight: 'bold' }}>Excluir</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </TouchableOpacity>
-
-            <Text>Página {currentPage} de {totalPages}</Text>
-
-            <TouchableOpacity
-              onPress={() => setCurrentPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              style={{
-                padding: 10,
-                backgroundColor: currentPage === totalPages ? '#ccc' : '#007bff',
-                borderRadius: 5
-              }}
-            >
-              <Text style={{ color: '#fff' }}>Próximo</Text>
-            </TouchableOpacity>
-          </View>
-        </>
+          )}
+          keyExtractor={(item) => item._id}
+        />
       ) : (
         <Text style={{ textAlign: 'center', marginTop: 20 }}>Nenhuma publicação encontrada.</Text>
       )}

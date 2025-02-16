@@ -10,7 +10,7 @@
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchText, setSearchText] = useState(''); // Para armazenar o texto da busca
-    const API_URL = 'http://192.168.0.16:3000';
+    const API_URL = 'http://192.168.0.25:3000';
     const postsPerPage = 4;
 
     useEffect(() => {

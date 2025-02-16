@@ -6,7 +6,7 @@ const AlunoScreen = ({ route }) => {
   const { token } = route.params; // Pegando o token passado na navegação
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true); // Estado de carregamento
-  const API_URL = 'http://192.168.0.16:3000'
+  const API_URL = 'http://192.168.0.25:3000'
 
   useEffect(() => {
     const fetchPosts = async () => {

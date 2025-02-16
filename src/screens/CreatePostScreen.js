@@ -10,7 +10,7 @@ const CreatePostScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [isProfessor, setIsProfessor] = useState(false);
 
-  const API_URL = 'http://192.168.0.16:3000';
+  const API_URL = 'http://192.168.0.25:3000';
 
   useEffect(() => {
     const checkRole = async () => {
