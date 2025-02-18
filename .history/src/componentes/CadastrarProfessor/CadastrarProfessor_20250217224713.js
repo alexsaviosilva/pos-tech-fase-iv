@@ -8,7 +8,7 @@ import styles from "./styles";
 const CadastrarProfessor = ({ navigation }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // 🔥 Agora o usuário pode definir a senha
+  const [password, setPassword] = useState(""); // 🔥 Adicionado campo de senha
   const [disciplina, setDisciplina] = useState("");
   const [disciplinas, setDisciplinas] = useState([]);
 
@@ -22,7 +22,7 @@ const CadastrarProfessor = ({ navigation }) => {
           return;
         }
 
-        const response = await fetch(`${API_URL}/disciplinas`, {
+        const response = await fetch(`${API_URL}/disciplinas`.trim(), {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -53,17 +53,18 @@ const CadastrarProfessor = ({ navigation }) => {
         return;
       }
 
+      const url = `${API_URL}/professores`.trim();
       const requestData = {
         name,
         email,
-        password,
+        password, // 🔥 Agora o usuário define a senha
         disciplina,
-        role: "professor", // 🔥 Enviando a role corretamente
+        role: "professor",
       };
 
       console.log("📩 Enviando payload:", JSON.stringify(requestData, null, 2));
 
-      const response = await fetch(`${API_URL}/professores`, {
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

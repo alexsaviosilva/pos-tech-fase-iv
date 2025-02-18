@@ -8,11 +8,9 @@ import styles from "./styles";
 const CadastrarProfessor = ({ navigation }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // 🔥 Agora o usuário pode definir a senha
   const [disciplina, setDisciplina] = useState("");
   const [disciplinas, setDisciplinas] = useState([]);
 
-  // 🔄 Buscar disciplinas ao carregar a tela
   useEffect(() => {
     const fetchDisciplinas = async () => {
       try {
@@ -31,7 +29,7 @@ const CadastrarProfessor = ({ navigation }) => {
         const data = await response.json();
         setDisciplinas(data);
       } catch (error) {
-        console.error("❌ Erro ao buscar disciplinas:", error);
+        console.error("Erro ao buscar disciplinas:", error);
         Alert.alert("Erro", "Falha ao carregar disciplinas.");
       }
     };
@@ -39,9 +37,9 @@ const CadastrarProfessor = ({ navigation }) => {
     fetchDisciplinas();
   }, []);
 
-  // 💾 Função para salvar o professor no backend
+  // Função para salvar o professor no backend
   const handleSave = async () => {
-    if (!name.trim() || !email.trim() || !password.trim() || !disciplina) {
+    if (!name.trim() || !email.trim() || !disciplina) {
       Alert.alert("Erro", "Todos os campos são obrigatórios.");
       return;
     }
@@ -53,15 +51,16 @@ const CadastrarProfessor = ({ navigation }) => {
         return;
       }
 
+      // 🔥 Construindo o JSON para envio
       const requestData = {
         name,
         email,
-        password,
-        disciplina,
-        role: "professor", // 🔥 Enviando a role corretamente
+        password: "123456", // 🔥 Garante que a senha está sendo enviada
+        disciplina, // 🔥 Confirme se é o ID da disciplina correto
+        role: "professor", // 🔥 Adicionando a role exigida pelo backend
       };
 
-      console.log("📩 Enviando payload:", JSON.stringify(requestData, null, 2));
+      console.log("📩 Enviando dados para o backend:", requestData); // LOG PARA DEBUG
 
       const response = await fetch(`${API_URL}/professores`, {
         method: "POST",
@@ -80,7 +79,7 @@ const CadastrarProfessor = ({ navigation }) => {
         navigation.goBack();
       } else {
         console.error("❌ Erro ao cadastrar professor:", result);
-        Alert.alert("Erro", result.message || `Erro ao cadastrar professor. Código: ${response.status}`);
+        Alert.alert("Erro", result.message || "Erro ao cadastrar professor.");
       }
     } catch (error) {
       console.error("❌ Erro ao conectar com o backend:", error);
@@ -93,7 +92,7 @@ const CadastrarProfessor = ({ navigation }) => {
       <Text style={styles.headerTitle}>Cadastrar Professor 👨‍🏫</Text>
 
       <View style={styles.formContainer}>
-        {/* Nome */}
+        {/* Nome do professor */}
         <View style={styles.formRow}>
           <Text style={styles.inputLabel}>Nome</Text>
           <TextInput
@@ -104,7 +103,7 @@ const CadastrarProfessor = ({ navigation }) => {
           />
         </View>
 
-        {/* E-mail */}
+        {/* E-mail do professor */}
         <View style={styles.formRow}>
           <Text style={styles.inputLabel}>E-mail</Text>
           <TextInput
@@ -117,19 +116,7 @@ const CadastrarProfessor = ({ navigation }) => {
           />
         </View>
 
-        {/* Senha */}
-        <View style={styles.formRow}>
-          <Text style={styles.inputLabel}>Senha</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Digite uma senha"
-            secureTextEntry
-          />
-        </View>
-
-        {/* Picker Disciplina */}
+        {/* Picker para seleção de disciplina */}
         <View style={styles.formRow}>
           <Text style={styles.inputLabel}>Disciplina</Text>
           <Picker
@@ -141,9 +128,9 @@ const CadastrarProfessor = ({ navigation }) => {
             {disciplinas.length > 0 ? (
               disciplinas.map((disciplinaItem) => (
                 <Picker.Item
-                  key={disciplinaItem._id}
-                  label={disciplinaItem.name}
-                  value={disciplinaItem._id}
+                  key={disciplinaItem._id} // Se o backend usa '_id', mantenha isso
+                  label={disciplinaItem.name} // Nome da disciplina
+                  value={disciplinaItem._id} // ID da disciplina para o backend
                 />
               ))
             ) : (

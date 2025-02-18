@@ -8,7 +8,6 @@ import styles from "./styles";
 const CadastrarProfessor = ({ navigation }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // 🔥 Agora o usuário pode definir a senha
   const [disciplina, setDisciplina] = useState("");
   const [disciplinas, setDisciplinas] = useState([]);
 
@@ -22,7 +21,7 @@ const CadastrarProfessor = ({ navigation }) => {
           return;
         }
 
-        const response = await fetch(`${API_URL}/disciplinas`, {
+        const response = await fetch(`${API_URL}/disciplinas`.trim(), {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -41,7 +40,7 @@ const CadastrarProfessor = ({ navigation }) => {
 
   // 💾 Função para salvar o professor no backend
   const handleSave = async () => {
-    if (!name.trim() || !email.trim() || !password.trim() || !disciplina) {
+    if (!name.trim() || !email.trim() || !disciplina) {
       Alert.alert("Erro", "Todos os campos são obrigatórios.");
       return;
     }
@@ -53,17 +52,20 @@ const CadastrarProfessor = ({ navigation }) => {
         return;
       }
 
+      const url = `${API_URL}/professores`.trim(); // 🔥 Garantindo que a URL está correta
       const requestData = {
         name,
         email,
-        password,
+        password: "123456",
         disciplina,
-        role: "professor", // 🔥 Enviando a role corretamente
+        role: "professor",
       };
-
       console.log("📩 Enviando payload:", JSON.stringify(requestData, null, 2));
 
-      const response = await fetch(`${API_URL}/professores`, {
+      console.log("📩 Enviando requisição para:", url);
+      console.log("📊 Payload enviado:", requestData);
+
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -114,18 +116,6 @@ const CadastrarProfessor = ({ navigation }) => {
             placeholder="Digite o e-mail"
             keyboardType="email-address"
             autoCapitalize="none"
-          />
-        </View>
-
-        {/* Senha */}
-        <View style={styles.formRow}>
-          <Text style={styles.inputLabel}>Senha</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Digite uma senha"
-            secureTextEntry
           />
         </View>
 
